@@ -97,12 +97,17 @@ public class ClubService {
     }
 
     // 4. 동아리 수정
-    public ClubResponse update(Long id, ClubUpdateRequest request) {
+    public ClubResponse update(Long id, ClubUpdateRequest request, Long currentUserId) {
         Club club = clubRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("동아리가 없습니다."));
 
+        // 권한 체크!
+        if (!club.getMaster().getId().equals(currentUserId)) {
+            throw new RuntimeException("동아리 대표자만 수정할 수 있어요");
+        }
+
         User master = null;
-        if (request.getMasterId() != null){
+        if (request.getMasterId() != null) {
             master = userRepository.findById(request.getMasterId())
                     .orElseThrow(() -> new RuntimeException("대표자가 없습니다"));
         }
@@ -133,9 +138,15 @@ public class ClubService {
     }
 
     // 5. 동아리 삭제
-    public void delete(Long id) {
+    public void delete(Long id, Long currentUserId) {
         Club club = clubRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("동아리가 존재하지 않습니다"));
+
+        // 권한 체크!
+        if (!club.getMaster().getId().equals(currentUserId)) {
+            throw new RuntimeException("동아리 대표자만 삭제할 수 있어요");
+        }
+
         clubRepository.delete(club);
     }
 }
