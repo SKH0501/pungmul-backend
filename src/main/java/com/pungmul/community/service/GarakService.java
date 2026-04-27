@@ -43,6 +43,15 @@ public class GarakService {
         return toResponse(garak);
     }
 
+    public GarakResponse update(Long id, GarakCreateRequest request) {
+        Garak garak = garakRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("가락을 찾을 수 없어요"));
+        // Garak.java에 update 메서드 추가 필요
+        garak.update(request.getTransitions());
+        Garak saved = garakRepository.save(garak);
+        return toResponse(saved);
+    }
+
     // Entity → Response 변환
     private GarakResponse toResponse(Garak garak) {
         return GarakResponse.builder()

@@ -35,4 +35,11 @@ public class GarakController {
     public ResponseEntity<GarakResponse> getOne(@PathVariable Long id) {
         return ResponseEntity.ok(garakService.getOne(id));
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<GarakResponse> update(
+            @PathVariable Long id,
+            @RequestBody GarakCreateRequest request) {
+        return ResponseEntity.ok(garakService.update(id, request));
+    }
 }
