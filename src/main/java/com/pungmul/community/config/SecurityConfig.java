@@ -3,6 +3,7 @@ package com.pungmul.community.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -49,6 +50,12 @@ public class SecurityConfig {
                                 "/upload",
                                 "/upload/**"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/**").permitAll()  // ✅ 조회는 누구나
+                        .requestMatchers("/api/users/me").authenticated()        // ✅ 내 정보는 로그인 필요
+                        .requestMatchers("/api/me").authenticated()              // ✅ 기존 me API
+                        .requestMatchers(HttpMethod.POST, "/api/**").authenticated()   // ✅ 등록은 로그인
+                        .requestMatchers(HttpMethod.PATCH, "/api/**").authenticated()  // ✅ 수정은 로그인
+                        .requestMatchers(HttpMethod.DELETE, "/api/**").authenticated() // ✅ 삭제는 로그인
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

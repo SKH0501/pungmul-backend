@@ -1,12 +1,12 @@
 package com.pungmul.community.controller;
 
 import com.pungmul.community.domain.User;
+import com.pungmul.community.dto.request.UserProfileRequest;
+import com.pungmul.community.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -15,6 +15,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserController {
 
+    private final UserRepository userRepository;  // ✅ 추가
+
     @GetMapping("/me")
     public ResponseEntity<?> getMe(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
@@ -22,7 +24,19 @@ public class UserController {
                 "id", user.getId(),
                 "name", user.getName(),
                 "email", user.getEmail(),
-                "profileImage", user.getProfileImage() != null ? user.getProfileImage() : ""
+                "profileImage", user.getProfileImage() != null ? user.getProfileImage() : "",
+                "school", user.getSchool() != null ? user.getSchool() : "",  // ✅ 추가
+                "profileComplete", user.isProfileComplete()  // ✅ 추가
         ));
+    }
+
+    @PatchMapping("/users/me")  // ✅ 추가
+    public ResponseEntity<Void> completeProfile(
+            @RequestBody UserProfileRequest request,
+            Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        user.completeProfile(request.getSchool());
+        userRepository.save(user);
+        return ResponseEntity.ok().build();
     }
 }

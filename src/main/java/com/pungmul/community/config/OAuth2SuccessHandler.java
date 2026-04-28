@@ -46,7 +46,12 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String token = jwtUtil.generateToken(email);
 
-        // ✅ 수정
-        response.sendRedirect(frontendUrl + "/oauth/callback?token=" + token);
+        // ✅ 신규 유저면 온보딩으로, 기존 유저면 메인으로
+        if (!user.isProfileComplete()) {
+            response.sendRedirect(frontendUrl + "/onboarding?token=" + token);
+        } else {
+            response.sendRedirect(frontendUrl + "/oauth/callback?token=" + token);
+        }
+
     }
 }
