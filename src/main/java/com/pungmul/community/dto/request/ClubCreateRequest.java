@@ -23,9 +23,6 @@ public class ClubCreateRequest {
     @NotNull
     private Club.ClubType clubType;
 
-    @NotNull
-    private Long masterId;
-
     private LocalDateTime foundedAt;  // 창단 연도 (선택사항)
 
 }
