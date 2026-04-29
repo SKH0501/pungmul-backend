@@ -39,6 +39,9 @@ public class ClubMember {
         this.joinedAt = LocalDateTime.now();
     }
 
+    public void updateRole(MemberRole memberRole) {
+        this.memberRole = memberRole;
+    }
     public enum MemberRole {
         MEMBER,  // 일반 멤버
         ADMIN    // 운영진

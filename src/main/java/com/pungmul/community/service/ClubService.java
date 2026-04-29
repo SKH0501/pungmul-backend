@@ -185,7 +185,68 @@ public class ClubService {
         join.reject();
         clubJoinRepository.save(join);
     }
+    // 10. 멤버 목록 조회
+    public List<?> getMembers(Long clubId) {
+        return clubMemberRepository.findByClubId(clubId)
+                .stream()
+                .map(m -> java.util.Map.of(
+                        "memberId", m.getId(),
+                        "userId", m.getUser().getId(),
+                        "userName", m.getUser().getName(),
+                        "userSchool", m.getUser().getSchool() != null ? m.getUser().getSchool() : "",
+                        "profileImage", m.getUser().getProfileImage() != null ? m.getUser().getProfileImage() : "",
+                        "memberRole", m.getMemberRole().name(),
+                        "joinedAt", m.getJoinedAt()
+                ))
+                .collect(Collectors.toList());
+    }
 
+    // 11. 운영진 임명/해제
+    @Transactional
+    public void updateMemberRole(Long clubId, Long memberId, String role, User currentUser) {
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> new RuntimeException("동아리가 없습니다"));
+
+        if (!club.getMaster().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("대표자만 역할을 변경할 수 있어요");
+        }
+
+        ClubMember member = clubMemberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("멤버가 없습니다"));
+
+        member.updateRole(ClubMember.MemberRole.valueOf(role));
+        clubMemberRepository.save(member);
+    }
+
+    // 12. 강퇴
+    @Transactional
+    public void kickMember(Long clubId, Long memberId, User currentUser) {
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> new RuntimeException("동아리가 없습니다"));
+
+        if (!club.getMaster().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("대표자만 강퇴할 수 있어요");
+        }
+
+        ClubMember member = clubMemberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("멤버가 없습니다"));
+
+        // 대표자는 강퇴 불가
+        if (member.getUser().getId().equals(club.getMaster().getId())) {
+            throw new RuntimeException("대표자는 강퇴할 수 없어요");
+        }
+
+        clubMemberRepository.delete(member);
+    }
+
+    public List<ClubResponse> search(String name, String location, Club.ClubType clubType) {
+        return clubRepository.findAll().stream()
+                .filter(c -> name == null || c.getName().contains(name))
+                .filter(c -> location == null || c.getLocation().contains(location))
+                .filter(c -> clubType == null || c.getClubType() == clubType)
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
 
     // ✅ 공통 응답 변환
     private ClubResponse toResponse(Club club) {

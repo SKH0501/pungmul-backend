@@ -1,5 +1,6 @@
 package com.pungmul.community.controller;
 
+import com.pungmul.community.domain.Club;
 import com.pungmul.community.domain.User;
 import com.pungmul.community.dto.request.ClubCreateRequest;
 import com.pungmul.community.dto.request.ClubUpdateRequest;
@@ -99,4 +100,42 @@ public class ClubController {
         clubService.reject(id, requestId, currentUser);
         return ResponseEntity.ok().build();
     }
+    // 10. 멤버 목록
+    @GetMapping("/{id}/members")
+    public ResponseEntity<?> getMembers(@PathVariable Long id) {
+        return ResponseEntity.ok(clubService.getMembers(id));
+    }
+
+    // 11. 역할 변경
+    @PatchMapping("/{id}/members/{memberId}/role")
+    public ResponseEntity<Void> updateMemberRole(
+            @PathVariable Long id,
+            @PathVariable Long memberId,
+            @RequestBody java.util.Map<String, String> body,
+            Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        clubService.updateMemberRole(id, memberId, body.get("role"), currentUser);
+        return ResponseEntity.ok().build();
+    }
+
+    // 12. 강퇴
+    @DeleteMapping("/{id}/members/{memberId}")
+    public ResponseEntity<Void> kickMember(
+            @PathVariable Long id,
+            @PathVariable Long memberId,
+            Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        clubService.kickMember(id, memberId, currentUser);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 동아리 검색
+    @GetMapping("/search")
+    public ResponseEntity<List<ClubResponse>> search(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) Club.ClubType clubType) {
+        return ResponseEntity.ok(clubService.search(name, location, clubType));
+    }
+
 }
