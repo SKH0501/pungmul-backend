@@ -48,7 +48,8 @@ public class SecurityConfig {
                                 "/login/oauth2/**",
                                 "/api/**",
                                 "/upload",
-                                "/upload/**"
+                                "/upload/**",
+                                "/upload/presigned"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()  // ✅ 조회는 누구나
                         .requestMatchers("/api/users/me").authenticated()        // ✅ 내 정보는 로그인 필요
