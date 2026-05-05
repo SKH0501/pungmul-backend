@@ -1,5 +1,4 @@
 package com.pungmul.community.controller;
-
 import com.pungmul.community.domain.User;
 import com.pungmul.community.dto.request.UserProfileRequest;
 import com.pungmul.community.repository.UserRepository;
@@ -7,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Map;
 
 @RestController
@@ -16,7 +14,6 @@ import java.util.Map;
 public class UserController {
 
     private final UserRepository userRepository;  // ✅ 추가
-
     @GetMapping("/me")
     public ResponseEntity<?> getMe(Authentication authentication) {
         User user = (User) authentication.getPrincipal();

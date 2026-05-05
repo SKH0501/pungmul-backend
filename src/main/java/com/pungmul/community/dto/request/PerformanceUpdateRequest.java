@@ -10,6 +10,7 @@ public class PerformanceUpdateRequest {
     private String title;           // @NotBlank 없음!
     private String description;
     private String location;
+    private String PostImage;
     private LocalDateTime performedAt;
     private Performance.PerformanceType performanceType;
 }

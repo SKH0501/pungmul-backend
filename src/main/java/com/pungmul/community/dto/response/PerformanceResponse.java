@@ -13,13 +13,15 @@ public class PerformanceResponse {
     private String title;
     private String description;
     private String location;
+    private String PostImage;
     private LocalDateTime performedAt;
     private Performance.PerformanceType performanceType;
+    private String status;
 
     // Club 객체 대신 필요한 것만!
     private Long clubId;
     private String clubName;
-
+    private String clubProfileImage;
     // User 객체 대신 필요한 것만!
     private Long authorId;
     private String authorName;

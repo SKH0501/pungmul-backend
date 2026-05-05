@@ -19,6 +19,8 @@ public class PerformanceCreateRequest {
     @NotBlank
     private String location; // 클라이언트가 위치를 직접 입력
 
+    private String postIamge;
+
     // @NotNull  → String 외 타입에 (null 방지)
     @NotNull
     private Long userId;  // 임시! 나중에 로그인 구현하면 제거해요

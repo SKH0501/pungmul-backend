@@ -19,7 +19,7 @@ public class ClubService {
     private final ClubRepository clubRepository;
     private final UserRepository userRepository;
     private final ClubMemberRepository clubMemberRepository;
-    private final ClubJoinRepository clubJoinRepository;  // ✅ 이름 변경
+    private final ClubJoinRepository clubJoinRepository;
 
 
     // 1. 동아리 등록 ✅ User 파라미터 추가
