@@ -13,7 +13,7 @@ public class PerformanceResponse {
     private String title;
     private String description;
     private String location;
-    private String PostImage;
+    private String posterImage;
     private LocalDateTime performedAt;
     private Performance.PerformanceType performanceType;
     private String status;

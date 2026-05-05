@@ -33,6 +33,8 @@ public class Performance {
     @Column(nullable = false)
     private String location;
 
+    private String posterImage;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PerformanceType performanceType;
@@ -66,11 +68,13 @@ public class Performance {
     // Performance.java에 추가
     public void update(String title, String description,
                        String location, LocalDateTime performedAt,
-                       Performance.PerformanceType performanceType) {
+                       Performance.PerformanceType performanceType,
+                       String posterImage) {
         if (title != null) this.title = title;
         if (description != null) this.description = description;
         if (location != null) this.location = location;
         if (performedAt != null) this.performedAt = performedAt;
         if (performanceType != null) this.performanceType = performanceType;
+        if (posterImage != null) this.posterImage = posterImage;
     }
 }
