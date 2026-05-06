@@ -10,7 +10,7 @@ public class PerformanceUpdateRequest {
     private String title;           // @NotBlank 없음!
     private String description;
     private String location;
-    private String PosterImage;
+    private String posterImage;
     private LocalDateTime performedAt;
     private Performance.PerformanceType performanceType;
 }
