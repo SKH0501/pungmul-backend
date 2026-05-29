@@ -19,5 +19,6 @@ public class ReviewResponse {
     private int commentCount;           // 댓글 수
     private int likeCount;              // 좋아요 수
     private LocalDateTime createdAt;    // 작성일
+    private String authorProfileImage;  // ✅ 추가
 
 }

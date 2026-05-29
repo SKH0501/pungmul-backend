@@ -5,16 +5,14 @@ import com.pungmul.community.domain.Review;
 import com.pungmul.community.domain.User;
 import com.pungmul.community.dto.request.ReviewCreateRequest;
 import com.pungmul.community.dto.request.ReviewUpdateRequest;
-import com.pungmul.community.dto.response.PerformanceResponse;
 import com.pungmul.community.dto.response.ReviewResponse;
 import com.pungmul.community.repository.PerformanceRepository;
 import com.pungmul.community.repository.ReviewRepository;
-import com.pungmul.community.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,112 +21,80 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final PerformanceRepository performanceRepository;
-    private final UserRepository userRepository;
 
-    // 1. 후기 등록
-    public ReviewResponse create(ReviewCreateRequest request) {
-        // Performance 조회
+    // 1. 댓글 등록 ✅ User 파라미터 추가
+    @Transactional
+    public ReviewResponse create(ReviewCreateRequest request, User author) {
         Performance performance = performanceRepository.findById(request.getPerformanceId())
-                .orElseThrow(()-> new RuntimeException("공연이 없습니다."));
-        // User 조회
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("유저가 없습니다."));
+                .orElseThrow(() -> new RuntimeException("공연이 없습니다."));
 
-        // Request → Entity 변환
         Review review = Review.builder()
-                .content(request.getContent())      // content는 request에서
-                .performance(performance)            // 위에서 조회한 performance 객체
-                .author(user)                        // 위에서 조회한 user 객체
-                .build();
-        // DB 저장
-        Review saved =  reviewRepository.save(review);
-        // Entity → Response 변환
-        return ReviewResponse.builder()
-                .id(saved.getId())
-                .content(saved.getContent())
-                .performanceId(saved.getPerformance().getId())
-                .performanceTitle(saved.getPerformance().getTitle())
-                .clubName(saved.getPerformance().getClub().getName())
-                .authorId(saved.getAuthor().getId())
-                .authorName(saved.getAuthor().getName())
-                .commentCount(saved.getComments().size())
-                .likeCount(saved.getLikes().size())
-                .createdAt(saved.getCreatedAt())
+                .content(request.getContent())
+                .performance(performance)
+                .author(author)
                 .build();
 
+        return toResponse(reviewRepository.save(review));
     }
 
-    // 2. 후기 목록 (공연별)
+    // 2. 댓글 목록 (공연별)
     public List<ReviewResponse> getList(Long performanceId) {
-        // 1. performanceId로 후기 목록 조회
-        List<Review> reviews = reviewRepository.findByPerformanceId(performanceId);
-        // 2. stream으로 ReviewResponse 변환
-        // 힌트: Performance getList의 stream 패턴이랑 똑같아요!
-        return reviews.stream()
-                .map(review -> ReviewResponse.builder()
-                        .id(review.getId())
-                        .content(review.getContent())
-                        .performanceId(review.getPerformance().getId())
-                        .performanceTitle(review.getPerformance().getTitle())
-                        .clubName(review.getPerformance().getClub().getName())
-                        .authorId(review.getAuthor().getId())
-                        .authorName(review.getAuthor().getName())
-                        .commentCount(review.getComments().size())
-                        .likeCount(review.getLikes().size())
-                        .createdAt(review.getCreatedAt())
-                        .build())
+        return reviewRepository.findByPerformanceId(performanceId)
+                .stream()
+                .map(this::toResponse)
                 .collect(Collectors.toList());
-
     }
 
-    // 3. 후기 단건 조회
+    // 3. 댓글 단건 조회
     public ReviewResponse getOne(Long id) {
-        Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("해당 review 가 존재하지 않습니다."));
-
-        return ReviewResponse.builder()
-                .id(review.getId())
-                .content(review.getContent())
-                .performanceId(review.getPerformance().getId())
-                .performanceTitle(review.getPerformance().getTitle())
-                .clubName(review.getPerformance().getClub().getName())
-                .authorId(review.getAuthor().getId())
-                .authorName(review.getAuthor().getName())
-                .commentCount(review.getComments().size())
-                .likeCount(review.getLikes().size())
-                .createdAt(review.getCreatedAt())
-                .build();
+        return toResponse(reviewRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("댓글이 없습니다.")));
     }
 
-    // 4. 후기 수정
-    public ReviewResponse update(Long id, ReviewUpdateRequest request) {
+    // 4. 댓글 수정 ✅ 권한 체크 추가
+    @Transactional
+    public ReviewResponse update(Long id, ReviewUpdateRequest request, User currentUser) {
         Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("해당 review 가 존재하지 않습니다."));
-        review.update(
-                request.getContent()
-        );
+                .orElseThrow(() -> new RuntimeException("댓글이 없습니다."));
 
-        Review saved =  reviewRepository.save(review);
+        if (!review.getAuthor().getId().equals(currentUser.getId())
+                && currentUser.getRole() != User.Role.ADMIN) {
+            throw new RuntimeException("작성자 또는 관리자만 수정할 수 있어요");
+        }
 
-        return ReviewResponse.builder()
-                .id(saved.getId())
-                .content(saved.getContent())
-                .performanceId(saved.getPerformance().getId())
-                .performanceTitle(saved.getPerformance().getTitle())
-                .clubName(saved.getPerformance().getClub().getName())
-                .authorId(saved.getAuthor().getId())
-                .authorName(saved.getAuthor().getName())
-                .commentCount(saved.getComments().size())
-                .likeCount(saved.getLikes().size())
-                .createdAt(saved.getCreatedAt())
-                .build();
+        review.update(request.getContent());
+        return toResponse(reviewRepository.save(review));
     }
 
-    // 5. 후기 삭제
-    public void delete(Long id) {
+    // 5. 댓글 삭제 ✅ 권한 체크 추가
+    @Transactional
+    public void delete(Long id, User currentUser) {
         Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException(" 삭제할 공연이 안보입니다 "));
+                .orElseThrow(() -> new RuntimeException("댓글이 없습니다."));
+
+        if (!review.getAuthor().getId().equals(currentUser.getId())
+                && currentUser.getRole() != User.Role.ADMIN) {
+            throw new RuntimeException("작성자 또는 관리자만 삭제할 수 있어요");
+        }
+
         reviewRepository.delete(review);
     }
 
+    // ✅ 공통 응답 변환
+    private ReviewResponse toResponse(Review r) {
+        return ReviewResponse.builder()
+                .id(r.getId())
+                .content(r.getContent())
+                .performanceId(r.getPerformance().getId())
+                .performanceTitle(r.getPerformance().getTitle())
+                .clubName(r.getPerformance().getClub().getName())
+                .authorId(r.getAuthor().getId())
+                .authorName(r.getAuthor().getName())
+                .authorProfileImage(r.getAuthor().getProfileImage() != null
+                        ? r.getAuthor().getProfileImage() : "")
+                .commentCount(r.getComments().size())
+                .likeCount(r.getLikes().size())
+                .createdAt(r.getCreatedAt())
+                .build();
+    }
 }

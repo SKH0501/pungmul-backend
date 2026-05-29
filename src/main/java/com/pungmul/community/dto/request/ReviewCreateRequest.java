@@ -11,6 +11,6 @@ public class ReviewCreateRequest {
     private String content;
     @NotNull
     private Long performanceId;
-    @NotNull
-    private Long userId;
+//    @NotNull
+//    private Long userId;
 }
