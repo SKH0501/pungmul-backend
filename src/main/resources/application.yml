@@ -32,6 +32,9 @@ server:
   port: 8080
   forward-headers-strategy: framework
 
+app:
+  frontend-url: https://pungmul-frontend.vercel.app
+
 cloud:
   aws:
     credentials:
