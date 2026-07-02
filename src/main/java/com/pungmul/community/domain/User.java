@@ -42,4 +42,15 @@ public class User {
     public enum Role {
         USER, ADMIN
     }
+
+    private String school;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean profileComplete = false;
+
+    public void completeProfile(String school) {
+        this.school = school;
+        this.profileComplete = true;
+    }
 }

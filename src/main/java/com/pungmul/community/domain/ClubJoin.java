@@ -1,19 +1,16 @@
 package com.pungmul.community.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "club_members")
+@Table(name = "club_joins")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ClubMember {
+public class ClubJoin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,21 +26,21 @@ public class ClubMember {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private MemberRole memberRole;
+    @Builder.Default
+    private JoinStatus status = JoinStatus.PENDING;
 
     @Column(nullable = false)
-    private LocalDateTime joinedAt;
+    private LocalDateTime requestedAt;
 
     @PrePersist
     public void prePersist() {
-        this.joinedAt = LocalDateTime.now();
+        this.requestedAt = LocalDateTime.now();
     }
 
-    public void updateRole(MemberRole memberRole) {
-        this.memberRole = memberRole;
-    }
-    public enum MemberRole {
-        MEMBER,  // 일반 멤버
-        ADMIN    // 운영진
+    public void approve() { this.status = JoinStatus.APPROVED; }
+    public void reject() { this.status = JoinStatus.REJECTED; }
+
+    public enum JoinStatus {
+        PENDING, APPROVED, REJECTED
     }
 }

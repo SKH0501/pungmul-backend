@@ -40,4 +40,8 @@ public class Garak {
         this.createdAt = LocalDateTime.now();
     }
 
+    public void update(String transitions) {
+        if (transitions != null) this.transitions = transitions;
+    }
+
 }

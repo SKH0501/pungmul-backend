@@ -23,5 +23,4 @@ public class ClubResponse {
 
     private LocalDateTime foundedAt;   // 창단일
     private LocalDateTime createdAt;   // 서버 등록일
-
 }
